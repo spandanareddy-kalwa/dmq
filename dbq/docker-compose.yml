@@ -1,0 +1,112 @@
+services:
+  zookeeper:
+    image: zookeeper:3.9.2
+    hostname: zookeeper
+    ports:
+      - "2181:2181"
+    volumes:
+      - zookeeper-data:/data
+      - zookeeper-datalog:/datalog
+    restart: unless-stopped
+
+  coordinator:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+      args:
+        MODULE: coordinator
+    hostname: coordinator
+    environment:
+      DBQ_COORDINATOR_PORT: 9090
+      DBQ_ADMIN_HTTP_PORT: 8080
+      DBQ_HEARTBEAT_TIMEOUT_MS: 15000
+      DBQ_ZOOKEEPER_CONNECT_STRING: zookeeper:2181
+      DBQ_ZOOKEEPER_SESSION_TIMEOUT_MS: 10000
+    ports:
+      - "9090:9090"
+      - "8080:8080"
+    depends_on:
+      - zookeeper
+    restart: unless-stopped
+
+  broker-1:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+      args:
+        MODULE: broker
+    hostname: broker-1
+    environment:
+      DBQ_BROKER_ID: broker-1
+      DBQ_BROKER_HOST: broker-1
+      DBQ_BROKER_PORT: 9091
+      DBQ_DATA_DIR: /var/lib/dbq
+      DBQ_COORDINATOR_HOST: coordinator
+      DBQ_COORDINATOR_PORT: 9090
+      DBQ_HEARTBEAT_INTERVAL_MS: 5000
+      DBQ_SEGMENT_BYTES: 67108864
+      DBQ_MAX_RECORD_BYTES: 16777216
+    ports:
+      - "9091:9091"
+    volumes:
+      - broker-1-data:/var/lib/dbq
+    depends_on:
+      - coordinator
+    restart: unless-stopped
+
+  broker-2:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+      args:
+        MODULE: broker
+    hostname: broker-2
+    environment:
+      DBQ_BROKER_ID: broker-2
+      DBQ_BROKER_HOST: broker-2
+      DBQ_BROKER_PORT: 9092
+      DBQ_DATA_DIR: /var/lib/dbq
+      DBQ_COORDINATOR_HOST: coordinator
+      DBQ_COORDINATOR_PORT: 9090
+      DBQ_HEARTBEAT_INTERVAL_MS: 5000
+      DBQ_SEGMENT_BYTES: 67108864
+      DBQ_MAX_RECORD_BYTES: 16777216
+    ports:
+      - "9092:9092"
+    volumes:
+      - broker-2-data:/var/lib/dbq
+    depends_on:
+      - coordinator
+    restart: unless-stopped
+
+  broker-3:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+      args:
+        MODULE: broker
+    hostname: broker-3
+    environment:
+      DBQ_BROKER_ID: broker-3
+      DBQ_BROKER_HOST: broker-3
+      DBQ_BROKER_PORT: 9093
+      DBQ_DATA_DIR: /var/lib/dbq
+      DBQ_COORDINATOR_HOST: coordinator
+      DBQ_COORDINATOR_PORT: 9090
+      DBQ_HEARTBEAT_INTERVAL_MS: 5000
+      DBQ_SEGMENT_BYTES: 67108864
+      DBQ_MAX_RECORD_BYTES: 16777216
+    ports:
+      - "9093:9093"
+    volumes:
+      - broker-3-data:/var/lib/dbq
+    depends_on:
+      - coordinator
+    restart: unless-stopped
+
+volumes:
+  zookeeper-data:
+  zookeeper-datalog:
+  broker-1-data:
+  broker-2-data:
+  broker-3-data:

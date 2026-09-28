@@ -1,0 +1,71 @@
+syntax = "proto3";
+
+package dbq;
+
+import "common.proto";
+
+option java_multiple_files = true;
+option java_package = "com.dbq.proto";
+
+service BrokerService {
+  rpc Produce(ProduceRequest) returns (ProduceResponse);
+  rpc Fetch(FetchRequest) returns (FetchResponse);
+  rpc GetPartitionState(GetPartitionStateRequest) returns (GetPartitionStateResponse);
+  rpc Replicate(ReplicateRequest) returns (ReplicateResponse);
+}
+
+message ProduceRequest {
+  string topic = 1;
+  int32 partition = 2;
+  repeated MessageRecord messages = 3;
+  string producer_id = 4;
+  ProducerAckMode.AckLevel ack_mode = 5;
+}
+
+message ProduceResponse {
+  bool success = 1;
+  int64 base_offset = 2;
+  int64 last_offset = 3;
+  string error = 4;
+}
+
+message FetchRequest {
+  string topic = 1;
+  int32 partition = 2;
+  int64 offset = 3;
+  int32 max_messages = 4;
+  bool long_poll = 5;
+  string consumer_group = 6;
+  int64 long_poll_timeout_ms = 7;
+}
+
+message FetchResponse {
+  repeated MessageRecord messages = 1;
+  int64 next_offset = 2;
+  bool has_more = 3;
+}
+
+message GetPartitionStateRequest {
+  string topic = 1;
+  int32 partition = 2;
+}
+
+message GetPartitionStateResponse {
+  PartitionMetadata metadata = 1;
+  int64 last_offset = 2;
+  int64 high_watermark = 3;
+}
+
+message ReplicateRequest {
+  string source_broker_id = 1;
+  string topic = 2;
+  int32 partition = 3;
+  repeated MessageRecord messages = 4;
+  int64 start_offset = 5;
+}
+
+message ReplicateResponse {
+  bool success = 1;
+  string message = 2;
+  int64 replicated_offset = 3;
+}

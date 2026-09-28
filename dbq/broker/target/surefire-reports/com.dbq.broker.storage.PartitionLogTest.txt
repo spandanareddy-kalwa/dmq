@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: com.dbq.broker.storage.PartitionLogTest
+-------------------------------------------------------------------------------
+Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.141 s -- in com.dbq.broker.storage.PartitionLogTest

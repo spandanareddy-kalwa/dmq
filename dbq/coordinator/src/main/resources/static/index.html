@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f3f6f4">
+  <title>DBQ | Queue Operations</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="wordmark" href="/" aria-label="DBQ home"><span class="mark">D</span><span>DBQ</span><i>QUEUE OPERATIONS</i></a>
+    <div class="top-actions">
+      <span class="connection"><span class="status-dot" id="status-dot"></span><span id="connection-label">Connecting</span></span>
+      <button class="button button-quiet" id="refresh-button" type="button">Refresh</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="page-heading">
+      <div>
+        <p class="eyebrow">LOCAL CLUSTER <span id="sample-time">WAITING FOR COORDINATOR</span></p>
+        <h1>Cluster overview</h1>
+      </div>
+      <div class="heading-mark" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
+    </section>
+
+    <section class="metrics" aria-label="Cluster totals">
+      <div class="metric metric-green"><span>LIVE BROKERS</span><strong id="live-broker-count">--</strong><small id="broker-total">-- registered</small></div>
+      <div class="metric metric-orange"><span>TOPICS</span><strong id="topic-count">--</strong><small>configured streams</small></div>
+      <div class="metric metric-blue"><span>PARTITIONS</span><strong id="partition-count">--</strong><small id="replica-health">-- ISR healthy</small></div>
+      <div class="metric metric-red"><span>CONSUMER GROUPS</span><strong id="group-count">--</strong><small id="group-members">-- active members</small></div>
+    </section>
+
+    <section class="overview-grid">
+      <section class="surface topic-surface" aria-labelledby="topics-heading">
+        <div class="section-heading">
+          <div><p class="eyebrow">METADATA</p><h2 id="topics-heading">Topics</h2></div>
+          <button class="button button-accent" id="open-topic-form" type="button">New topic <span aria-hidden="true">+</span></button>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>NAME</th><th>PARTITIONS</th><th>REPLICAS</th><th>RETENTION</th></tr></thead>
+            <tbody id="topics-body"><tr><td class="empty-state" colspan="4">Waiting for coordinator</td></tr></tbody>
+          </table>
+        </div>
+        <form class="inline-form hidden" id="topic-form">
+          <label>Topic name<input name="topicName" required maxlength="249" placeholder="orders"></label>
+          <label>Partitions<input name="partitionCount" type="number" min="1" value="3" required></label>
+          <label>Replication<input name="replicationFactor" type="number" min="1" value="3" required></label>
+          <label>Retention (days)<input name="retentionDays" type="number" min="0" value="7" required></label>
+          <button class="button button-dark" type="submit">Create topic</button>
+        </form>
+      </section>
+
+      <section class="surface brokers-surface" aria-labelledby="brokers-heading">
+        <div class="section-heading">
+          <div><p class="eyebrow">HEARTBEATS</p><h2 id="brokers-heading">Brokers</h2></div>
+          <span class="live-mark"><span></span>LIVE</span>
+        </div>
+        <div class="broker-list" id="brokers-list"><p class="empty-state">Waiting for brokers</p></div>
+      </section>
+    </section>
+
+    <section class="surface partition-surface" aria-labelledby="partitions-heading">
+      <div class="section-heading">
+        <div><p class="eyebrow">LEADERSHIP & REPLICATION</p><h2 id="partitions-heading">Partitions</h2></div>
+        <span class="section-note" id="partition-summary">Offsets shown as next-to-read boundaries</span>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>TOPIC / PARTITION</th><th>LEADER</th><th>REPLICAS</th><th>ISR</th><th>LOG START</th><th>HIGH WATERMARK</th><th>LOG END</th><th>REPLICATION</th></tr></thead>
+          <tbody id="partitions-body"><tr><td class="empty-state" colspan="8">No partition metadata</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="workbench" aria-labelledby="workbench-heading">
+      <div class="workbench-heading">
+        <div><p class="eyebrow">INTERACTIVE</p><h2 id="workbench-heading">Message workbench</h2></div>
+        <span class="section-note">Published records are fetched from broker logs</span>
+      </div>
+      <div class="workbench-grid">
+        <section class="surface workbench-form" aria-labelledby="publish-heading">
+          <div class="section-heading"><div><p class="eyebrow">PRODUCE</p><h3 id="publish-heading">Publish a record</h3></div></div>
+          <form id="publish-form" class="stack-form">
+            <label>Topic<select name="topic" id="publish-topic" required><option value="">Select topic</option></select></label>
+            <div class="form-row">
+              <label>Partition<input name="partition" id="publish-partition" type="number" min="0" value="0" required></label>
+              <label>Acknowledgement<select name="ackMode"><option>ACK_ALL</option><option>ACK_1</option><option>ACK_0</option></select></label>
+            </div>
+            <label>Key<input name="key" maxlength="1024" placeholder="order-1042"></label>
+            <label>Payload<textarea name="payload" rows="5" required placeholder="{ &quot;status&quot;: &quot;created&quot; }"></textarea></label>
+            <button class="button button-dark" type="submit">Publish record <span aria-hidden="true">↗</span></button>
+          </form>
+          <p class="form-result" id="publish-result" aria-live="polite"></p>
+        </section>
+
+        <section class="surface message-surface" aria-labelledby="messages-heading">
+          <div class="section-heading">
+            <div><p class="eyebrow">PULL FETCH</p><h3 id="messages-heading">Committed messages</h3></div>
+            <button class="button button-quiet" id="fetch-button" type="button">Fetch</button>
+          </div>
+          <form class="fetch-controls" id="fetch-form">
+            <label>Topic<select name="topic" id="fetch-topic" required><option value="">Select topic</option></select></label>
+            <label>Partition<input name="partition" id="fetch-partition" type="number" min="0" value="0" required></label>
+            <label>Offset<input name="offset" id="fetch-offset" type="number" min="0" value="0" required></label>
+          </form>
+          <p class="fetch-state" id="fetch-state" aria-live="polite">Choose a topic and fetch a partition.</p>
+          <div class="message-list" id="message-list"><p class="empty-state">No messages loaded</p></div>
+        </section>
+      </div>
+    </section>
+
+    <section class="bottom-grid">
+      <section class="surface groups-surface" aria-labelledby="groups-heading">
+        <div class="section-heading">
+          <div><p class="eyebrow">ASSIGNMENTS</p><h2 id="groups-heading">Consumer groups</h2></div>
+          <button class="button button-accent" id="open-group-form" type="button">Join group <span aria-hidden="true">+</span></button>
+        </div>
+        <div class="table-scroll"><table><thead><tr><th>GROUP</th><th>MEMBERS</th><th>GENERATION</th><th>ASSIGNMENTS</th></tr></thead><tbody id="groups-body"><tr><td class="empty-state" colspan="4">No active groups</td></tr></tbody></table></div>
+        <form class="inline-form hidden" id="group-form">
+          <label>Group ID<input name="groupId" required maxlength="128" value="demo-workers"></label>
+          <label>Consumer ID<input name="consumerId" required maxlength="128" value="console-consumer"></label>
+          <label>Topic<select name="topic" id="group-topic" required><option value="">Select topic</option></select></label>
+          <button class="button button-dark" type="submit">Join</button>
+        </form>
+        <div class="group-session hidden" id="group-session">
+          <div class="group-session-status"><span class="live-mark"><span></span>MEMBER</span><span id="group-assignment">No partitions assigned</span></div>
+          <div class="group-session-actions">
+            <button class="button button-quiet" id="poll-group" type="button">Poll assigned</button>
+            <button class="button button-dark" id="commit-group" type="button" disabled>Commit fetched</button>
+            <button class="button button-quiet leave-button" id="leave-group" type="button">Leave</button>
+          </div>
+          <div class="group-message-list" id="group-message-list"><p class="empty-state">Join a group to start polling.</p></div>
+        </div>
+      </section>
+      <section class="surface offsets-surface" aria-labelledby="offsets-heading">
+        <div class="section-heading"><div><p class="eyebrow">CHECKPOINTS</p><h2 id="offsets-heading">Committed offsets</h2></div></div>
+        <div class="table-scroll"><table><thead><tr><th>GROUP</th><th>PARTITION</th><th>NEXT OFFSET</th></tr></thead><tbody id="offsets-body"><tr><td class="empty-state" colspan="3">No commits yet</td></tr></tbody></table></div>
+      </section>
+    </section>
+
+    <footer><span>DBQ / DISTRIBUTED MESSAGE QUEUE</span><span>ADMIN API IS FOR LOCAL DEVELOPMENT</span></footer>
+  </main>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>

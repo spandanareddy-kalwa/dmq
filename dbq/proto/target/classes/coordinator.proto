@@ -1,0 +1,177 @@
+syntax = "proto3";
+
+package dbq;
+
+import "common.proto";
+
+option java_multiple_files = true;
+option java_package = "com.dbq.proto";
+
+service CoordinatorService {
+  rpc RegisterBroker(RegisterBrokerRequest) returns (RegisterBrokerResponse);
+  rpc Heartbeat(HeartbeatRequest) returns (HeartbeatResponse);
+  rpc GetLiveBrokers(Empty) returns (GetLiveBrokersResponse);
+  rpc CreateTopic(CreateTopicRequest) returns (CreateTopicResponse);
+  rpc GetTopicMetadata(GetTopicMetadataRequest) returns (GetTopicMetadataResponse);
+  rpc GetPartitionMetadata(GetPartitionMetadataRequest) returns (GetPartitionMetadataResponse);
+  rpc GetLeader(GetLeaderRequest) returns (GetLeaderResponse);
+  rpc GetReplicas(GetReplicasRequest) returns (GetReplicasResponse);
+  rpc ElectLeader(ElectLeaderRequest) returns (ElectLeaderResponse);
+  rpc CommitOffset(CommitOffsetRequest) returns (CommitOffsetResponse);
+  rpc GetCommittedOffset(GetCommittedOffsetRequest) returns (GetCommittedOffsetResponse);
+  rpc JoinConsumerGroup(JoinConsumerGroupRequest) returns (JoinConsumerGroupResponse);
+  rpc HeartbeatConsumerGroup(HeartbeatConsumerGroupRequest) returns (HeartbeatConsumerGroupResponse);
+  rpc LeaveConsumerGroup(LeaveConsumerGroupRequest) returns (LeaveConsumerGroupResponse);
+  rpc UpdateReplicaProgress(UpdateReplicaProgressRequest) returns (UpdateReplicaProgressResponse);
+}
+
+message RegisterBrokerRequest {
+  BrokerInfo broker = 1;
+}
+
+message RegisterBrokerResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message HeartbeatRequest {
+  string broker_id = 1;
+  int64 timestamp_ms = 2;
+}
+
+message HeartbeatResponse {
+  bool alive = 1;
+  string message = 2;
+}
+
+message GetLiveBrokersResponse {
+  repeated BrokerInfo brokers = 1;
+}
+
+message CreateTopicRequest {
+  string topic_name = 1;
+  int32 partition_count = 2;
+  int32 replication_factor = 3;
+  int64 retention_ms = 4;
+  int64 segment_size_bytes = 5;
+}
+
+message CreateTopicResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message GetTopicMetadataRequest {
+  string topic_name = 1;
+}
+
+message GetTopicMetadataResponse {
+  TopicMetadata metadata = 1;
+}
+
+message GetPartitionMetadataRequest {
+  string topic_name = 1;
+  int32 partition_id = 2;
+}
+
+message GetPartitionMetadataResponse {
+  PartitionMetadata metadata = 1;
+}
+
+message GetLeaderRequest {
+  string topic_name = 1;
+  int32 partition_id = 2;
+}
+
+message GetLeaderResponse {
+  string leader_broker_id = 1;
+}
+
+message GetReplicasRequest {
+  string topic_name = 1;
+  int32 partition_id = 2;
+}
+
+message GetReplicasResponse {
+  repeated string broker_ids = 1;
+}
+
+message ElectLeaderRequest {
+  string topic_name = 1;
+  int32 partition_id = 2;
+}
+
+message ElectLeaderResponse {
+  string leader_broker_id = 1;
+  bool success = 2;
+}
+
+message CommitOffsetRequest {
+  string consumer_group = 1;
+  string topic = 2;
+  int32 partition = 3;
+  int64 offset = 4;
+}
+
+message CommitOffsetResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message GetCommittedOffsetRequest {
+  string consumer_group = 1;
+  string topic = 2;
+  int32 partition = 3;
+}
+
+message GetCommittedOffsetResponse {
+  int64 offset = 1;
+  bool found = 2;
+}
+
+message JoinConsumerGroupRequest {
+  string group_id = 1;
+  string consumer_id = 2;
+  repeated string topic_names = 3;
+}
+
+message JoinConsumerGroupResponse {
+  bool success = 1;
+  string message = 2;
+  int64 generation_id = 3;
+  repeated TopicPartition assigned_partitions = 4;
+}
+
+message HeartbeatConsumerGroupRequest {
+  string group_id = 1;
+  string consumer_id = 2;
+}
+
+message HeartbeatConsumerGroupResponse {
+  bool alive = 1;
+  int64 generation_id = 2;
+  repeated TopicPartition assigned_partitions = 3;
+}
+
+message LeaveConsumerGroupRequest {
+  string group_id = 1;
+  string consumer_id = 2;
+}
+
+message LeaveConsumerGroupResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message UpdateReplicaProgressRequest {
+  string broker_id = 1;
+  string topic = 2;
+  int32 partition = 3;
+  int64 log_end_offset = 4;
+}
+
+message UpdateReplicaProgressResponse {
+  bool success = 1;
+  int64 high_watermark = 2;
+  string message = 3;
+}

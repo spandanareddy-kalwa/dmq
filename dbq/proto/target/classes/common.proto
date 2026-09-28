@@ -1,0 +1,67 @@
+syntax = "proto3";
+
+package dbq;
+
+option java_multiple_files = true;
+option java_package = "com.dbq.proto";
+option java_outer_classname = "DbqProto";
+
+message MessageRecord {
+  string message_id = 1;
+  string topic = 2;
+  int32 partition = 3;
+  int64 offset = 4;
+  string key = 5;
+  bytes payload = 6;
+  int64 timestamp = 7;
+  int64 size = 8;
+  string checksum = 9;
+  map<string, string> headers = 10;
+}
+
+message TopicMetadata {
+  string name = 1;
+  int32 partition_count = 2;
+  int32 replication_factor = 3;
+  int64 retention_ms = 4;
+  int64 segment_size_bytes = 5;
+}
+
+message BrokerInfo {
+  string broker_id = 1;
+  string host = 2;
+  int32 port = 3;
+  bool alive = 4;
+  int64 last_heartbeat_ms = 5;
+}
+
+message PartitionMetadata {
+  string topic = 1;
+  int32 partition_id = 2;
+  string leader_broker_id = 3;
+  repeated string replica_broker_ids = 4;
+  repeated string isr_broker_ids = 5;
+  int64 high_watermark = 6;
+  int64 log_start_offset = 7;
+  int64 log_end_offset = 8;
+}
+
+message TopicPartition {
+  string topic = 1;
+  int32 partition = 2;
+}
+
+message ProducerAckMode {
+  enum AckLevel {
+    ACK_UNSPECIFIED = 0;
+    ACK_0 = 1;
+    ACK_1 = 2;
+    ACK_ALL = 3;
+  }
+}
+
+message Empty {} 
+
+message StringResponse {
+  string value = 1;
+}
