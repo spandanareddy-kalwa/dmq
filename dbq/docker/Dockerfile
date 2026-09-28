@@ -3,7 +3,7 @@ FROM maven:3.9-eclipse-temurin-17 AS build
 WORKDIR /workspace
 ARG MODULE
 COPY . .
-RUN mvn -B -q -pl ${MODULE} -am package -DskipTests
+RUN mvn -B -q -pl ${MODULE} -am package -DskipTests -Dos.detected.classifier=linux-x86_64
 
 FROM eclipse-temurin:17-jre
 ARG MODULE
