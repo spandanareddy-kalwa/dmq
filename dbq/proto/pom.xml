@@ -34,14 +34,14 @@
         </dependency>
     </dependencies>
 
-    <build>
+   <build>
         <plugins>
             <plugin>
                 <groupId>org.xolstice.maven.plugins</groupId>
-               <protocArtifact>com.google.protobuf:protoc:${protobuf.version}:osx-aarch_64</protocArtifact>
+                <artifactId>protobuf-maven-plugin</artifactId>
                 <version>0.6.1</version>
                 <configuration>
-                    <protocArtifact>com.google.protobuf:protoc:${protobuf.version}:osx-aarch_64</protocArtifact>
+                    <protocArtifact>com.google.protobuf:protoc:${protobuf.version}:linux-x86_64</protocArtifact>
                     <pluginId>grpc-java</pluginId>
                     <pluginArtifact>io.grpc:protoc-gen-grpc-java:${grpc.version}:linux-x86_64</pluginArtifact>
                     <protoSourceRoot>${project.basedir}/src/main/proto</protoSourceRoot>
@@ -56,5 +56,5 @@
                 </executions>
             </plugin>
         </plugins>
-    </build>
+    </build> 
 </project>
